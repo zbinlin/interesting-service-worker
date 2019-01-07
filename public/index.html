@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title></title>
+    </head>
+    <body>
+        <p>Test Service Work</p>
+        <img src="https://www.taobao.com/favicon.ico">
+        <script>
+            async function bootstrap() {
+                const reg = await navigator.serviceWorker.register("/proxy.js", {
+                    scope: "/",
+                });
+
+                reg.addEventListener("updatefound", () => {
+                    const installingWorker = reg.installing;
+
+                    installingWorker.addEventListener("statechange", async evt => {
+                        if (evt.target.state === "activated") {
+                            const res = await fetch(location.href);
+                            const html = await res.text();
+                            const domParser = new DOMParser();
+                            const dom = domParser.parseFromString(html, "text/html");
+                            document.documentElement.replaceWith(dom.documentElement);
+                        }
+                    });
+                });
+            }
+            bootstrap().then(console.log.bind(console), console.error.bind(console));
+        </script>
+    </body>
+</html>
